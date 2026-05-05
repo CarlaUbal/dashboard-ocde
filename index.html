@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard OCDE</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6fb;
+      color: #2c3e50;
+    }
+    header {
+      background: linear-gradient(135deg, #003f7f, #0066cc);
+      color: white;
+      padding: 24px 40px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    header img {
+      height: 50px;
+    }
+    header div h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+    header div p {
+      font-size: 0.95rem;
+      opacity: 0.85;
+      margin-top: 4px;
+    }
+    .kpi-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 32px 40px 0;
+      justify-content: center;
+    }
+    .kpi-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px 32px;
+      flex: 1 1 180px;
+      max-width: 220px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      border-top: 5px solid #0066cc;
+      transition: transform 0.2s;
+    }
+    .kpi-card:hover { transform: translateY(-4px); }
+    .kpi-card .value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #003f7f;
+    }
+    .kpi-card .label {
+      font-size: 0.85rem;
+      color: #7f8c8d;
+      margin-top: 6px;
+    }
+    .kpi-card .trend {
+      font-size: 0.8rem;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+    .trend.up { color: #27ae60; }
+    .trend.down { color: #e74c3c; }
+    .charts-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      padding: 32px 40px;
+      justify-content: center;
+    }
+    .chart-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      flex: 1 1 420px;
+      max-width: 560px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+    .chart-card h3 {
+      font-size: 1rem;
+      color: #003f7f;
+      margin-bottom: 16px;
+      border-bottom: 2px solid #e8edf5;
+      padding-bottom: 8px;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.8rem;
+      color: #aaa;
+      background: #eef1f7;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>📊 Dashboard OCDE</h1>
+    <p>Indicadores clave de bienestar, economía y desarrollo — Actualizado 2026</p>
+  </div>
+</header>
+
+<div class="kpi-section">
+  <div class="kpi-card">
+    <div class="value">38</div>
+    <div class="label">Países Miembros</div>
+    <div class="trend up">↑ +2 desde 2020</div>
+  </div>
+  <div class="kpi-card">
+    <div class="value">71%</div>
+    <div class="label">Tasa de Empleo Promedio</div>
+    <div class="trend up">↑ +1.4% interanual</div>
+  </div>
+  <div class="kpi-card">
+    <div class="value">$48.5K</div>
+    <div class="label">PIB per Cápita (USD)</div>
+    <div class="trend up">↑ +3.1% vs 2025</div>
+  </div>
+  <div class="kpi-card">
+    <div class="value">6.8</div>
+    <div class="label">Índice de Bienestar</div>
+    <div class="trend down">↓ -0.2 puntos</div>
+  </div>
+  <div class="kpi-card">
+    <div class="value">2.9%</div>
+    <div class="label">Inflación Promedio</div>
+    <div class="trend down">↓ -0.5% vs 2025</div>
+  </div>
+</div>
+
+<div class="charts-section">
+  <div class="chart-card">
+    <h3>📈 Crecimiento del PIB por País (2026)</h3>
+    <canvas id="barChart"></canvas>
+  </div>
+  <div class="chart-card">
+    <h3>🌍 Distribución del Gasto Público</h3>
+    <canvas id="doughnutChart"></canvas>
+  </div>
+  <div class="chart-card">
+    <h3>📉 Evolución de la Tasa de Desempleo (%)</h3>
+    <canvas id="lineChart"></canvas>
+  </div>
+  <div class="chart-card">
+    <h3>🎓 Nivel Educativo de la Población (35-44 años)</h3>
+    <canvas id="horizontalBar"></canvas>
+  </div>
+</div>
+
+<footer>
+  Dashboard OCDE · Datos referenciales con fines ilustrativos · © 2026 BICE Vida
+</footer>
+
+<script>
+  // Bar Chart - PIB
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Chile', 'México', 'España', 'Francia', 'Alemania', 'Japón', 'EEUU'],
+      datasets: [{
+        label: 'Crecimiento PIB (%)',
+        data: [2.8, 1.9, 2.3, 1.7, 1.5, 1.2, 2.6],
+        backgroundColor: ['#0066cc','#0088ee','#00aaff','#33bbff','#66ccff','#99ddff','#cceeff'],
+        borderRadius: 6
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
+
+  // Doughnut - Gasto Público
+  new Chart(document.getElementById('doughnutChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Salud', 'Educación', 'Defensa', 'Infraestructura', 'Social', 'Otros'],
+      datasets: [{
+        data: [22, 18, 10, 15, 25, 10],
+        backgroundColor: ['#003f7f','#0066cc','#0099ff','#33bbff','#66ccff','#b0d8ff'],
+        borderWidth: 2
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'right' } } }
+  });
+
+  // Line Chart - Desempleo
+  new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: {
+      labels: ['2020','2021','2022','2023','2024','2025','2026'],
+      datasets: [
+        { label: 'OCDE Promedio', data: [8.2, 7.5, 6.8, 6.2, 5.9, 5.5, 5.2], borderColor: '#0066cc', fill: false, tension: 0.4 },
+        { label: 'Chile', data: [10.8, 9.4, 8.1, 7.4, 7.0, 6.6, 6.3], borderColor: '#e74c3c', fill: false, tension: 0.4 },
+        { label: 'España', data: [15.5, 14.8, 13.2, 12.0, 11.5, 10.9, 10.2], borderColor: '#f39c12', fill: false, tension: 0.4 }
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: false } } }
+  });
+
+  // Horizontal Bar - Educación
+  new Chart(document.getElementById('horizontalBar'), {
+    type: 'bar',
+    data: {
+      labels: ['Chile', 'México', 'Turquía', 'OCDE Promedio', 'Canadá', 'Japón'],
+      datasets: [{
+        label: 'Educación Superior (%)',
+        data: [32, 21, 28, 45, 61, 58],
+        backgroundColor: '#0066cc',
+        borderRadius: 6
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true, max: 100 } }
+    }
+  });
+</script>
+</body>
+</html>
