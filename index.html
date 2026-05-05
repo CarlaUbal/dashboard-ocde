@@ -26,9 +26,11 @@
     .chart-card{background:#fff;border-radius:10px;padding:25px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
     .chart-card h3{font-size:1rem;color:#444;margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid #eee}
     .chart-wrapper{position:relative;height:280px}
-    .table-card{background:#fff;border-radius:10px;padding:25px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:25px}
+    .chart-wrapper-tall{position:relative;height:480px}
+    .chart-card.full-width{grid-column:1/-1}
+    .table-card{background:#fff;border-radius:10px;padding:25px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:25px;overflow-x:auto}
     .table-card h3{font-size:1rem;color:#444;margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid #eee}
-    table{width:100%;border-collapse:collapse}
+    table{width:100%;border-collapse:collapse;min-width:600px}
     th{background:#f8f9fa;padding:12px 15px;text-align:left;font-size:.85rem;color:#666;text-transform:uppercase;letter-spacing:.5px}
     td{padding:12px 15px;font-size:.9rem;border-bottom:1px solid #f0f0f0}
     tr:hover td{background:#fafbff}
@@ -46,7 +48,7 @@
 <header>
   <div>
     <h1>📊 Dashboard OCDE</h1>
-    <p style="opacity:.7;font-size:.9rem;margin-top:4px">Indicadores económicos y sociales · Desde 2010</p>
+    <p style="opacity:.7;font-size:.9rem;margin-top:4px">Indicadores económicos y sociales · 38 países miembros · Desde 2010</p>
   </div>
   <div style="text-align:right">
     <div style="font-size:.85rem;opacity:.8">Fuente: API pública OCDE</div>
@@ -61,16 +63,44 @@
     <div>
       <label for="country">🌎 País: </label>
       <select id="country">
-        <option value="CHL">Chile</option>
-        <option value="USA">Estados Unidos</option>
-        <option value="DEU">Alemania</option>
-        <option value="FRA">Francia</option>
-        <option value="GBR">Reino Unido</option>
-        <option value="JPN">Japón</option>
-        <option value="MEX">México</option>
-        <option value="ESP">España</option>
         <option value="AUS">Australia</option>
+        <option value="AUT">Austria</option>
+        <option value="BEL">Bélgica</option>
         <option value="CAN">Canadá</option>
+        <option value="CHL" selected>Chile</option>
+        <option value="COL">Colombia</option>
+        <option value="CRI">Costa Rica</option>
+        <option value="CZE">República Checa</option>
+        <option value="DNK">Dinamarca</option>
+        <option value="EST">Estonia</option>
+        <option value="FIN">Finlandia</option>
+        <option value="FRA">Francia</option>
+        <option value="DEU">Alemania</option>
+        <option value="GRC">Grecia</option>
+        <option value="HUN">Hungría</option>
+        <option value="ISL">Islandia</option>
+        <option value="IRL">Irlanda</option>
+        <option value="ISR">Israel</option>
+        <option value="ITA">Italia</option>
+        <option value="JPN">Japón</option>
+        <option value="KOR">Corea del Sur</option>
+        <option value="LVA">Letonia</option>
+        <option value="LTU">Lituania</option>
+        <option value="LUX">Luxemburgo</option>
+        <option value="MEX">México</option>
+        <option value="NLD">Países Bajos</option>
+        <option value="NZL">Nueva Zelanda</option>
+        <option value="NOR">Noruega</option>
+        <option value="POL">Polonia</option>
+        <option value="PRT">Portugal</option>
+        <option value="SVK">Eslovaquia</option>
+        <option value="SVN">Eslovenia</option>
+        <option value="ESP">España</option>
+        <option value="SWE">Suecia</option>
+        <option value="CHE">Suiza</option>
+        <option value="TUR">Türkiye</option>
+        <option value="GBR">Reino Unido</option>
+        <option value="USA">Estados Unidos</option>
       </select>
     </div>
     <div>
@@ -136,9 +166,9 @@
       <h3>🏫 Gasto en Educación (% PIB)</h3>
       <div class="chart-wrapper"><canvas id="eduChart"></canvas></div>
     </div>
-    <div class="chart-card">
-      <h3>🌍 Comparativa de Países · Gasto Salud (último año disponible)</h3>
-      <div class="chart-wrapper"><canvas id="compareChart"></canvas></div>
+    <div class="chart-card full-width">
+      <h3>🌍 Comparativa de los 38 países OCDE · Gasto en Salud (% PIB) — último año disponible</h3>
+      <div class="chart-wrapper-tall"><canvas id="compareChart"></canvas></div>
     </div>
   </div>
 
@@ -151,7 +181,7 @@
 </div>
 
 <footer>
-  Datos obtenidos desde la API pública de la OCDE (sdmx.oecd.org / stats.oecd.org) · Dashboard BICE VIDA
+  Datos obtenidos desde la API pública de la OCDE (sdmx.oecd.org / stats.oecd.org) · 38 países miembros · Dashboard BICE VIDA
 </footer>
 
 <script>
@@ -160,20 +190,38 @@
 // =============================================
 const OECD_SDMX   = 'https://sdmx.oecd.org/public/rest/data';
 const OECD_LEGACY = 'https://stats.oecd.org/SDMX-JSON/data';
-const START_YEAR_DEFAULT = 2010;
 
-const COUNTRY_NAMES = {
-  CHL:'Chile',USA:'Estados Unidos',DEU:'Alemania',FRA:'Francia',
-  GBR:'Reino Unido',JPN:'Japón',MEX:'México',ESP:'España',
-  AUS:'Australia',CAN:'Canadá'
+const ALL_COUNTRIES = {
+  AUS:'Australia', AUT:'Austria', BEL:'Bélgica', CAN:'Canadá',
+  CHL:'Chile', COL:'Colombia', CRI:'Costa Rica', CZE:'Rep. Checa',
+  DNK:'Dinamarca', EST:'Estonia', FIN:'Finlandia', FRA:'Francia',
+  DEU:'Alemania', GRC:'Grecia', HUN:'Hungría', ISL:'Islandia',
+  IRL:'Irlanda', ISR:'Israel', ITA:'Italia', JPN:'Japón',
+  KOR:'Corea del Sur', LVA:'Letonia', LTU:'Lituania', LUX:'Luxemburgo',
+  MEX:'México', NLD:'Países Bajos', NZL:'Nueva Zelanda', NOR:'Noruega',
+  POL:'Polonia', PRT:'Portugal', SVK:'Eslovaquia', SVN:'Eslovenia',
+  ESP:'España', SWE:'Suecia', CHE:'Suiza', TUR:'Türkiye',
+  GBR:'Reino Unido', USA:'Estados Unidos'
 };
+
+// Paleta de 38 colores para el gráfico comparativo
+const PALETTE = [
+  '#003087','#0055aa','#0077cc','#009ee0','#00bcd4',
+  '#28a745','#20c997','#00e676','#76ff03','#c6ff00',
+  '#fd7e14','#ff9800','#ffc107','#ffe082','#ffeb3b',
+  '#dc3545','#e91e63','#9c27b0','#673ab7','#3f51b5',
+  '#2196f3','#03a9f4','#00bcd4','#009688','#4caf50',
+  '#8bc34a','#cddc39','#ffeb3b','#ffc107','#ff9800',
+  '#ff5722','#795548','#9e9e9e','#607d8b','#37474f',
+  '#1a237e','#0d47a1','#1565c0'
+];
 
 let charts = {};
 let cachedData = {};
 let usingLiveData = false;
 
 // =============================================
-// FETCH GASTO EN SALUD  (OCDE SHA)
+// FETCH GASTO EN SALUD
 // =============================================
 async function fetchHealthData(country, start, end) {
   try {
@@ -190,7 +238,7 @@ async function fetchHealthData(country, start, end) {
 }
 
 // =============================================
-// FETCH ESPERANZA DE VIDA  (OCDE Health Stats)
+// FETCH ESPERANZA DE VIDA
 // =============================================
 async function fetchLifeData(country, start, end) {
   try {
@@ -207,7 +255,7 @@ async function fetchLifeData(country, start, end) {
 }
 
 // =============================================
-// FETCH GASTO EN EDUCACIÓN  (OCDE EAG)
+// FETCH GASTO EN EDUCACIÓN
 // =============================================
 async function fetchEduData(country, start, end) {
   try {
@@ -224,7 +272,7 @@ async function fetchEduData(country, start, end) {
 }
 
 // =============================================
-// FETCH PIB PER CÁPITA  (OCDE National Accounts)
+// FETCH PIB PER CÁPITA
 // =============================================
 async function fetchGDPData(country, start, end) {
   try {
@@ -241,12 +289,12 @@ async function fetchGDPData(country, start, end) {
 }
 
 // =============================================
-// FETCH COMPARATIVA MULTI-PAÍS
+// FETCH COMPARATIVA — LOS 38 PAÍSES
 // =============================================
-async function fetchComparison(start) {
-  const countries = Object.keys(COUNTRY_NAMES);
+async function fetchAllCountriesHealth(start) {
+  const codes = Object.keys(ALL_COUNTRIES);
   const results = {};
-  await Promise.all(countries.map(async c => {
+  await Promise.all(codes.map(async c => {
     const d = await fetchHealthData(c, start, new Date().getFullYear());
     const vals = Object.values(d);
     results[c] = vals.length ? vals[vals.length - 1] : 0;
@@ -316,10 +364,10 @@ function generateSeries(start, end, base, max, noise) {
 // ACTUALIZAR KPIs
 // =============================================
 function setKPI(valId, subId, data, suffix) {
-  const vals = Object.entries(data).sort((a,b)=>a[0]-b[0]);
+  const vals = Object.entries(data).sort((a,b) => a[0] - b[0]);
   if (!vals.length) return;
   const [lastYear, lastVal] = vals[vals.length - 1];
-  const [,prevVal] = vals.length > 1 ? vals[vals.length - 2] : [null, lastVal];
+  const [, prevVal] = vals.length > 1 ? vals[vals.length - 2] : [null, lastVal];
   const delta = +(lastVal - prevVal).toFixed(2);
   document.getElementById(valId).textContent = lastVal.toFixed(2) + (suffix || '');
   const sub = document.getElementById(subId);
@@ -328,7 +376,7 @@ function setKPI(valId, subId, data, suffix) {
 }
 
 // =============================================
-// RENDERIZAR GRÁFICOS
+// GRÁFICOS DE LÍNEA (país seleccionado)
 // =============================================
 function renderLine(id, label, data, color) {
   const labels = Object.keys(data).sort();
@@ -349,48 +397,76 @@ function renderLine(id, label, data, color) {
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: false, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } }
+      scales: {
+        y: { beginAtZero: false, grid: { color: '#f0f0f0' } },
+        x: { grid: { display: false } }
+      }
     }
   });
 }
 
+// =============================================
+// GRÁFICO DE BARRAS — 38 PAÍSES
+// =============================================
 function renderBar(id, data) {
-  const labels = Object.keys(data).map(c => COUNTRY_NAMES[c] || c);
-  const values = Object.values(data);
-  const palette = ['#003087','#0055aa','#0077cc','#28a745','#20c997','#fd7e14','#ffc107','#dc3545','#6f42c1','#17a2b8'];
+  // Ordenar de mayor a menor
+  const sorted = Object.entries(data).sort((a, b) => b[1] - a[1]);
+  const labels = sorted.map(([c]) => ALL_COUNTRIES[c] || c);
+  const values = sorted.map(([, v]) => v);
+  const colors = sorted.map((_, i) => PALETTE[i % PALETTE.length]);
+
   if (charts[id]) charts[id].destroy();
   charts[id] = new Chart(document.getElementById(id).getContext('2d'), {
     type: 'bar',
     data: {
       labels,
-      datasets: [{ label: 'Gasto Salud % PIB', data: values, backgroundColor: palette, borderRadius: 6 }]
+      datasets: [{
+        label: 'Gasto Salud % PIB',
+        data: values,
+        backgroundColor: colors,
+        borderRadius: 5
+      }]
     },
     options: {
-      responsive: true, maintainAspectRatio: false,
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
       plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } }
+      scales: {
+        x: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+        y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+      }
     }
   });
 }
 
 // =============================================
-// TABLA DE DATOS
+// TABLA DE DATOS (país seleccionado)
 // =============================================
 function renderTable(h, l, e, g) {
-  const years = [...new Set([...Object.keys(h),...Object.keys(l),...Object.keys(e),...Object.keys(g)])].sort((a,b)=>b-a);
+  const years = [...new Set([
+    ...Object.keys(h), ...Object.keys(l),
+    ...Object.keys(e), ...Object.keys(g)
+  ])].sort((a, b) => b - a);
+
   let html = `<table><thead><tr>
-    <th>Año</th><th>Gasto Salud (% PIB)</th><th>Esperanza de Vida</th>
-    <th>Gasto Educación (% PIB)</th><th>PIB per Cápita (USD)</th>
+    <th>Año</th>
+    <th>Gasto Salud (% PIB)</th>
+    <th>Esperanza de Vida</th>
+    <th>Gasto Educación (% PIB)</th>
+    <th>PIB per Cápita (USD)</th>
   </tr></thead><tbody>`;
+
   years.forEach(y => {
     html += `<tr>
       <td><strong>${y}</strong></td>
-      <td>${h[y]!=null ? h[y].toFixed(2)+'%' : '–'}</td>
-      <td>${l[y]!=null ? l[y].toFixed(1)+' años' : '–'}</td>
-      <td>${e[y]!=null ? e[y].toFixed(2)+'%' : '–'}</td>
-      <td>${g[y]!=null ? '$'+Math.round(g[y]).toLocaleString('es-CL') : '–'}</td>
+      <td>${h[y] != null ? h[y].toFixed(2) + '%' : '–'}</td>
+      <td>${l[y] != null ? l[y].toFixed(1) + ' años' : '–'}</td>
+      <td>${e[y] != null ? e[y].toFixed(2) + '%' : '–'}</td>
+      <td>${g[y] != null ? '$' + Math.round(g[y]).toLocaleString('es-CL') : '–'}</td>
     </tr>`;
   });
+
   html += '</tbody></table>';
   document.getElementById('table-container').innerHTML = html;
 }
@@ -401,11 +477,14 @@ function renderTable(h, l, e, g) {
 function exportCSV() {
   const { h, l, e, g } = cachedData;
   if (!h) { alert('Primero carga los datos.'); return; }
-  const years = [...new Set([...Object.keys(h),...Object.keys(l),...Object.keys(e),...Object.keys(g)])].sort();
+  const years = [...new Set([
+    ...Object.keys(h), ...Object.keys(l),
+    ...Object.keys(e), ...Object.keys(g)
+  ])].sort();
   let csv = 'Año,Gasto Salud (% PIB),Esperanza de Vida,Gasto Educación (% PIB),PIB per Cápita\n';
   years.forEach(y => csv += `${y},${h[y]||''},${l[y]||''},${e[y]||''},${g[y]||''}\n`);
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
   a.download = `ocde_${document.getElementById('country').value}_desde2010.csv`;
   a.click();
 }
@@ -428,15 +507,15 @@ async function loadDashboard() {
     fetchLifeData(country, startYear, endYear),
     fetchEduData(country, startYear, endYear),
     fetchGDPData(country, startYear, endYear),
-    fetchComparison(startYear)
+    fetchAllCountriesHealth(startYear)
   ]);
 
   cachedData = { h, l, e, g };
 
-  setKPI('kpi-health','kpi-health-sub', h, '%');
-  setKPI('kpi-life',  'kpi-life-sub',   l, ' años');
-  setKPI('kpi-edu',   'kpi-edu-sub',    e, '%');
-  setKPI('kpi-gdp',   'kpi-gdp-sub',    g, '');
+  setKPI('kpi-health', 'kpi-health-sub', h, '%');
+  setKPI('kpi-life',   'kpi-life-sub',   l, ' años');
+  setKPI('kpi-edu',    'kpi-edu-sub',    e, '%');
+  setKPI('kpi-gdp',    'kpi-gdp-sub',    g, '');
 
   renderLine('healthChart', 'Gasto en Salud (% PIB)', h, '#003087');
   renderLine('lifeChart',   'Esperanza de Vida',       l, '#28a745');
@@ -453,7 +532,6 @@ async function loadDashboard() {
     : '<span class="api-badge badge-demo">⚠️ Datos de demostración</span>';
 }
 
-// Inicializar al cargar la página
 document.addEventListener('DOMContentLoaded', loadDashboard);
 </script>
 </body>
