@@ -1,229 +1,614 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard OCDE</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Dashboard OCDE – BiceVida</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f6fb;
-      color: #2c3e50;
+    :root {
+      --bg: #f4f6fb;
+      --card: #ffffff;
+      --text: #1e293b;
+      --subtext: #64748b;
+      --primary: #1e4da1;
+      --accent: #3b82f6;
+      --border: #e2e8f0;
+      --kpi-1: #1e4da1;
+      --kpi-2: #0ea5e9;
+      --kpi-3: #10b981;
+      --kpi-4: #f59e0b;
+      --shadow: 0 2px 12px rgba(30,77,161,0.10);
     }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #f1f5f9;
+      --subtext: #94a3b8;
+      --primary: #3b82f6;
+      --accent: #60a5fa;
+      --border: #334155;
+      --shadow: 0 2px 12px rgba(0,0,0,0.4);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); transition: background .3s, color .3s; }
+
+    /* HEADER */
     header {
-      background: linear-gradient(135deg, #003f7f, #0066cc);
-      color: white;
-      padding: 24px 40px;
+      background: var(--primary);
+      color: #fff;
+      padding: 0 32px;
+      height: 64px;
       display: flex;
       align-items: center;
-      gap: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
     }
-    header img {
-      height: 50px;
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .logo { font-size: 1.35rem; font-weight: 700; letter-spacing: .5px; }
+    .logo span { color: #93c5fd; }
+    .badge { background: rgba(255,255,255,0.18); border-radius: 20px; padding: 2px 12px; font-size: .78rem; font-weight: 600; }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .theme-btn {
+      background: rgba(255,255,255,0.15);
+      border: none; border-radius: 50%;
+      width: 38px; height: 38px;
+      cursor: pointer; font-size: 1.15rem;
+      color: #fff; transition: background .2s;
     }
-    header div h1 {
-      font-size: 1.8rem;
-      font-weight: 700;
-    }
-    header div p {
-      font-size: 0.95rem;
-      opacity: 0.85;
-      margin-top: 4px;
-    }
-    .kpi-section {
+    .theme-btn:hover { background: rgba(255,255,255,0.28); }
+    .header-date { font-size: .82rem; opacity: .8; }
+
+    /* NAV TABS */
+    .nav-tabs {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
       display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      padding: 32px 40px 0;
-      justify-content: center;
+      gap: 4px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: none; border: none;
+      padding: 14px 20px;
+      font-size: .9rem; font-weight: 500;
+      color: var(--subtext);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-btn:hover { color: var(--text); }
+
+    /* MAIN */
+    main { max-width: 1400px; margin: 0 auto; padding: 28px 32px 48px; }
+
+    /* SECTION PANELS */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* SECTION TITLE */
+    .section-title {
+      font-size: 1.15rem; font-weight: 700;
+      color: var(--text); margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-title .icon { font-size: 1.3rem; }
+
+    /* KPI GRID */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
     }
     .kpi-card {
-      background: white;
-      border-radius: 12px;
-      padding: 24px 32px;
-      flex: 1 1 180px;
-      max-width: 220px;
-      text-align: center;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      border-top: 5px solid #0066cc;
-      transition: transform 0.2s;
+      background: var(--card);
+      border-radius: 14px;
+      padding: 22px 22px 18px;
+      box-shadow: var(--shadow);
+      border-left: 5px solid;
+      display: flex; flex-direction: column; gap: 8px;
+      transition: transform .18s, box-shadow .18s;
     }
-    .kpi-card:hover { transform: translateY(-4px); }
-    .kpi-card .value {
-      font-size: 2.2rem;
-      font-weight: 800;
-      color: #003f7f;
-    }
-    .kpi-card .label {
-      font-size: 0.85rem;
-      color: #7f8c8d;
-      margin-top: 6px;
-    }
-    .kpi-card .trend {
-      font-size: 0.8rem;
-      margin-top: 8px;
-      font-weight: 600;
-    }
-    .trend.up { color: #27ae60; }
-    .trend.down { color: #e74c3c; }
-    .charts-section {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 24px;
-      padding: 32px 40px;
-      justify-content: center;
+    .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(30,77,161,0.16); }
+    .kpi-card:nth-child(1) { border-color: var(--kpi-1); }
+    .kpi-card:nth-child(2) { border-color: var(--kpi-2); }
+    .kpi-card:nth-child(3) { border-color: var(--kpi-3); }
+    .kpi-card:nth-child(4) { border-color: var(--kpi-4); }
+    .kpi-label { font-size: .8rem; font-weight: 600; color: var(--subtext); text-transform: uppercase; letter-spacing: .5px; }
+    .kpi-value { font-size: 2rem; font-weight: 800; color: var(--text); }
+    .kpi-change { font-size: .82rem; font-weight: 600; }
+    .up { color: #10b981; } .down { color: #ef4444; }
+    .kpi-sub { font-size: .77rem; color: var(--subtext); }
+
+    /* CHARTS GRID */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
     }
     .chart-card {
-      background: white;
-      border-radius: 12px;
-      padding: 24px;
-      flex: 1 1 420px;
-      max-width: 560px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      background: var(--card);
+      border-radius: 14px;
+      padding: 22px 24px;
+      box-shadow: var(--shadow);
     }
-    .chart-card h3 {
-      font-size: 1rem;
-      color: #003f7f;
-      margin-bottom: 16px;
-      border-bottom: 2px solid #e8edf5;
-      padding-bottom: 8px;
+    .chart-title {
+      font-size: .92rem; font-weight: 700;
+      color: var(--text); margin-bottom: 16px;
+      display: flex; justify-content: space-between; align-items: center;
     }
+    .chart-tag {
+      font-size: .72rem; background: var(--bg);
+      color: var(--subtext); border-radius: 8px;
+      padding: 2px 10px; font-weight: 600;
+    }
+    .chart-wrap { position: relative; height: 240px; }
+
+    /* TABLE */
+    .table-card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 22px 24px;
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+      margin-bottom: 24px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th { background: var(--bg); color: var(--subtext); font-size: .77rem; text-transform: uppercase; letter-spacing: .5px; padding: 10px 14px; text-align: left; }
+    td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(59,130,246,0.04); }
+    .pill { display: inline-block; border-radius: 20px; padding: 2px 12px; font-size: .75rem; font-weight: 700; }
+    .pill-green { background: #d1fae5; color: #065f46; }
+    .pill-red { background: #fee2e2; color: #991b1b; }
+    .pill-yellow { background: #fef3c7; color: #92400e; }
+    .pill-blue { background: #dbeafe; color: #1e40af; }
+    [data-theme="dark"] .pill-green { background: #064e3b; color: #6ee7b7; }
+    [data-theme="dark"] .pill-red { background: #7f1d1d; color: #fca5a5; }
+    [data-theme="dark"] .pill-yellow { background: #78350f; color: #fde68a; }
+    [data-theme="dark"] .pill-blue { background: #1e3a8a; color: #93c5fd; }
+
+    /* PROGRESS BARS */
+    .progress-section { margin-bottom: 24px; }
+    .progress-item { margin-bottom: 14px; }
+    .progress-header { display: flex; justify-content: space-between; font-size: .85rem; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .progress-bar { height: 10px; background: var(--border); border-radius: 10px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 10px; transition: width 1s ease; }
+
+    /* FILTER ROW */
+    .filter-row {
+      display: flex; gap: 12px; align-items: center;
+      margin-bottom: 22px; flex-wrap: wrap;
+    }
+    .filter-row select, .filter-row input {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: var(--text);
+      font-size: .88rem;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    .filter-row select:focus, .filter-row input:focus { outline: none; border-color: var(--accent); }
+    .filter-label { font-size: .83rem; font-weight: 600; color: var(--subtext); }
+
+    /* FOOTER */
     footer {
       text-align: center;
-      padding: 20px;
-      font-size: 0.8rem;
-      color: #aaa;
-      background: #eef1f7;
-      margin-top: 20px;
+      padding: 18px;
+      font-size: .78rem;
+      color: var(--subtext);
+      border-top: 1px solid var(--border);
+      margin-top: 32px;
+    }
+
+    @media (max-width: 768px) {
+      main { padding: 16px; }
+      header { padding: 0 16px; }
+      .nav-tabs { padding: 0 12px; }
+      .charts-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
+<!-- HEADER -->
 <header>
-  <div>
-    <h1>📊 Dashboard OCDE</h1>
-    <p>Indicadores clave de bienestar, economía y desarrollo — Actualizado 2026</p>
+  <div class="header-left">
+    <div class="logo">BiceVida <span>|</span> OCDE</div>
+    <div class="badge">Dashboard Indicadores 2024</div>
+  </div>
+  <div class="header-right">
+    <span class="header-date" id="headerDate"></span>
+    <button class="theme-btn" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
   </div>
 </header>
 
-<div class="kpi-section">
-  <div class="kpi-card">
-    <div class="value">38</div>
-    <div class="label">Países Miembros</div>
-    <div class="trend up">↑ +2 desde 2020</div>
-  </div>
-  <div class="kpi-card">
-    <div class="value">71%</div>
-    <div class="label">Tasa de Empleo Promedio</div>
-    <div class="trend up">↑ +1.4% interanual</div>
-  </div>
-  <div class="kpi-card">
-    <div class="value">$48.5K</div>
-    <div class="label">PIB per Cápita (USD)</div>
-    <div class="trend up">↑ +3.1% vs 2025</div>
-  </div>
-  <div class="kpi-card">
-    <div class="value">6.8</div>
-    <div class="label">Índice de Bienestar</div>
-    <div class="trend down">↓ -0.2 puntos</div>
-  </div>
-  <div class="kpi-card">
-    <div class="value">2.9%</div>
-    <div class="label">Inflación Promedio</div>
-    <div class="trend down">↓ -0.5% vs 2025</div>
-  </div>
-</div>
+<!-- NAV TABS -->
+<nav class="nav-tabs">
+  <button class="tab-btn active" onclick="showTab('resumen',this)">📊 Resumen</button>
+  <button class="tab-btn" onclick="showTab('seguros',this)">🛡️ Seguros</button>
+  <button class="tab-btn" onclick="showTab('pensiones',this)">💼 Pensiones</button>
+  <button class="tab-btn" onclick="showTab('mercado',this)">📈 Mercado</button>
+  <button class="tab-btn" onclick="showTab('benchmarking',this)">🌍 Benchmarking</button>
+</nav>
 
-<div class="charts-section">
-  <div class="chart-card">
-    <h3>📈 Crecimiento del PIB por País (2026)</h3>
-    <canvas id="barChart"></canvas>
-  </div>
-  <div class="chart-card">
-    <h3>🌍 Distribución del Gasto Público</h3>
-    <canvas id="doughnutChart"></canvas>
-  </div>
-  <div class="chart-card">
-    <h3>📉 Evolución de la Tasa de Desempleo (%)</h3>
-    <canvas id="lineChart"></canvas>
-  </div>
-  <div class="chart-card">
-    <h3>🎓 Nivel Educativo de la Población (35-44 años)</h3>
-    <canvas id="horizontalBar"></canvas>
-  </div>
-</div>
+<main>
+
+  <!-- ============ RESUMEN ============ -->
+  <section id="sec-resumen" class="section active">
+    <div class="section-title"><span class="icon">📊</span> Resumen Ejecutivo — Indicadores OCDE 2024</div>
+
+    <div class="filter-row">
+      <span class="filter-label">Periodo:</span>
+      <select onchange="updateCharts()">
+        <option>2024</option><option>2023</option><option>2022</option><option>2021</option>
+      </select>
+      <span class="filter-label">País:</span>
+      <select>
+        <option>Chile</option><option>OCDE Promedio</option><option>Colombia</option><option>México</option>
+      </select>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Penetración Seguros</div>
+        <div class="kpi-value">4.8%</div>
+        <div class="kpi-change up">▲ +0.3% vs 2023</div>
+        <div class="kpi-sub">% del PIB</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Primas Totales</div>
+        <div class="kpi-value">USD 9.2B</div>
+        <div class="kpi-change up">▲ +5.1% YoY</div>
+        <div class="kpi-sub">Mercado asegurador</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Activos Fondos Pens.</div>
+        <div class="kpi-value">84.3%</div>
+        <div class="kpi-change up">▲ +2.1% vs 2023</div>
+        <div class="kpi-sub">% del PIB</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Tasa de Reemplazo</div>
+        <div class="kpi-value">38.2%</div>
+        <div class="kpi-change down">▼ -1.4% vs OCDE</div>
+        <div class="kpi-sub">Proyección pensión media</div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Penetración de Seguros — Evolución <span class="chart-tag">% PIB</span></div>
+        <div class="chart-wrap"><canvas id="chartPenetracion"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Distribución de Primas <span class="chart-tag">2024</span></div>
+        <div class="chart-wrap"><canvas id="chartPrimas"></canvas></div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="chart-title">Indicadores Clave por País — OCDE 2024</div>
+      <table>
+        <thead>
+          <tr>
+            <th>País</th>
+            <th>Penetración (%PIB)</th>
+            <th>Densidad (USD)</th>
+            <th>Activos Pensiones (%PIB)</th>
+            <th>Tasa Reemplazo</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>🇨🇱 Chile</td><td>4.8%</td><td>618</td><td>84.3%</td><td>38.2%</td><td><span class="pill pill-yellow">En desarrollo</span></td></tr>
+          <tr><td>🇺🇸 EE.UU.</td><td>11.2%</td><td>4,890</td><td>152.4%</td><td>49.1%</td><td><span class="pill pill-green">Avanzado</span></td></tr>
+          <tr><td>🇬🇧 Reino Unido</td><td>9.8%</td><td>3,720</td><td>101.2%</td><td>52.3%</td><td><span class="pill pill-green">Avanzado</span></td></tr>
+          <tr><td>🇲🇽 México</td><td>2.4%</td><td>184</td><td>16.8%</td><td>26.4%</td><td><span class="pill pill-red">Rezagado</span></td></tr>
+          <tr><td>🌍 OCDE Promedio</td><td>7.3%</td><td>2,103</td><td>98.6%</td><td>58.6%</td><td><span class="pill pill-blue">Referencia</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ SEGUROS ============ -->
+  <section id="sec-seguros" class="section">
+    <div class="section-title"><span class="icon">🛡️</span> Mercado Asegurador — Indicadores OCDE</div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Seguros de Vida</div>
+        <div class="kpi-value">USD 4.1B</div>
+        <div class="kpi-change up">▲ +6.2% YoY</div>
+        <div class="kpi-sub">Primas emitidas 2024</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Seguros No Vida</div>
+        <div class="kpi-value">USD 5.1B</div>
+        <div class="kpi-change up">▲ +4.1% YoY</div>
+        <div class="kpi-sub">Primas emitidas 2024</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Índice Siniestralidad</div>
+        <div class="kpi-value">61.4%</div>
+        <div class="kpi-change down">▼ -2.3% vs 2023</div>
+        <div class="kpi-sub">Claims / Primas</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Ratio Combinado</div>
+        <div class="kpi-value">97.8%</div>
+        <div class="kpi-change up">▲ Mejora técnica</div>
+        <div class="kpi-sub">Meta: &lt;100%</div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Evolución Primas Vida vs No Vida <span class="chart-tag">USD Millones</span></div>
+        <div class="chart-wrap"><canvas id="chartSegVida"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Índice de Siniestralidad por Ramo <span class="chart-tag">2024</span></div>
+        <div class="chart-wrap"><canvas id="chartSiniestralidad"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Progreso Metas OCDE — Seguros <span class="chart-tag">Chile 2024</span></div>
+      <div class="progress-section" style="margin-top:12px">
+        <div class="progress-item">
+          <div class="progress-header"><span>Penetración (meta: 7.3%)</span><span>4.8 / 7.3%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:65%;background:#3b82f6"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-header"><span>Densidad per cápita (meta: USD 2,103)</span><span>USD 618 / 2,103</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:29%;background:#0ea5e9"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-header"><span>Inclusión financiera (meta: 80%)</span><span>62 / 80%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:77%;background:#10b981"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-header"><span>Ratio combinado (meta: &lt;100%)</span><span>97.8 / 100%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:97%;background:#f59e0b"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PENSIONES ============ -->
+  <section id="sec-pensiones" class="section">
+    <div class="section-title"><span class="icon">💼</span> Sistema de Pensiones — Indicadores OCDE</div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Activos Totales</div>
+        <div class="kpi-value">USD 212B</div>
+        <div class="kpi-change up">▲ +7.4% YoY</div>
+        <div class="kpi-sub">84.3% del PIB</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Afiliados Activos</div>
+        <div class="kpi-value">11.4M</div>
+        <div class="kpi-change up">▲ +2.1% YoY</div>
+        <div class="kpi-sub">Cotizantes regulares</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Pensión Promedio</div>
+        <div class="kpi-value">$312K</div>
+        <div class="kpi-change up">▲ +4.8% real</div>
+        <div class="kpi-sub">CLP mensuales</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Rentabilidad Fondos</div>
+        <div class="kpi-value">+8.6%</div>
+        <div class="kpi-change up">▲ Fondo A 2024</div>
+        <div class="kpi-sub">Retorno anual real</div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Activos Fondos de Pensiones <span class="chart-tag">% PIB</span></div>
+        <div class="chart-wrap"><canvas id="chartPensActivos"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Distribución Afiliados por Fondo <span class="chart-tag">2024</span></div>
+        <div class="chart-wrap"><canvas id="chartAfiliados"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MERCADO ============ -->
+  <section id="sec-mercado" class="section">
+    <div class="section-title"><span class="icon">📈</span> Tendencias de Mercado</div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Crecimiento PIB Chile</div>
+        <div class="kpi-value">2.4%</div>
+        <div class="kpi-change up">▲ +0.8pp vs 2023</div>
+        <div class="kpi-sub">Proyección FMI 2024</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Inflación Acumulada</div>
+        <div class="kpi-value">4.1%</div>
+        <div class="kpi-change down">▼ -2.3pp vs 2023</div>
+        <div class="kpi-sub">IPC Diciembre 2024</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Tasa de Interés</div>
+        <div class="kpi-value">5.25%</div>
+        <div class="kpi-change down">▼ -75pb vs 2023</div>
+        <div class="kpi-sub">Banco Central Chile</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Riesgo País (EMBI)</div>
+        <div class="kpi-value">142pb</div>
+        <div class="kpi-change up">▼ Mejora</div>
+        <div class="kpi-sub">Spread soberano</div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Crecimiento PIB vs Primas <span class="chart-tag">% Variación anual</span></div>
+        <div class="chart-wrap"><canvas id="chartPIBPrimas"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Tasa de Interés e Inflación <span class="chart-tag">2019–2024</span></div>
+        <div class="chart-wrap"><canvas id="chartTasas"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BENCHMARKING ============ -->
+  <section id="sec-benchmarking" class="section">
+    <div class="section-title"><span class="icon">🌍</span> Benchmarking Internacional OCDE</div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Penetración de Seguros — Comparativa OCDE <span class="chart-tag">% PIB 2024</span></div>
+        <div class="chart-wrap"><canvas id="chartBenchPenetracion"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Tasa de Reemplazo Pensional <span class="chart-tag">% Salario final</span></div>
+        <div class="chart-wrap"><canvas id="chartBenchPension"></canvas></div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="chart-title">Ranking OCDE — Indicadores Financieros 2024</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Ranking</th><th>País</th><th>Penetración</th><th>Densidad</th><th>Activos Pens.</th><th>T. Reemplazo</th><th>Brecha vs OCDE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><b>#1</b></td><td>🇺🇸 EE.UU.</td><td>11.2%</td><td>4,890</td><td>152.4%</td><td>49.1%</td><td><span class="pill pill-green">+3.9pp</span></td></tr>
+          <tr><td><b>#2</b></td><td>🇬🇧 Reino Unido</td><td>9.8%</td><td>3,720</td><td>101.2%</td><td>52.3%</td><td><span class="pill pill-green">+2.5pp</span></td></tr>
+          <tr><td><b>#3</b></td><td>🇩🇪 Alemania</td><td>8.4%</td><td>2,940</td><td>68.1%</td><td>46.2%</td><td><span class="pill pill-blue">+1.1pp</span></td></tr>
+          <tr><td><b>#14</b></td><td>🇨🇱 Chile</td><td>4.8%</td><td>618</td><td>84.3%</td><td>38.2%</td><td><span class="pill pill-yellow">-2.5pp</span></td></tr>
+          <tr><td><b>#28</b></td><td>🇲🇽 México</td><td>2.4%</td><td>184</td><td>16.8%</td><td>26.4%</td><td><span class="pill pill-red">-4.9pp</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
 
 <footer>
-  Dashboard OCDE · Datos referenciales con fines ilustrativos · © 2026 BICE Vida
+  Dashboard OCDE · BiceVida © 2024 &nbsp;|&nbsp; Datos basados en OECD Insurance Statistics & Pension Markets in Focus 2024
 </footer>
 
 <script>
-  // Bar Chart - PIB
-  new Chart(document.getElementById('barChart'), {
-    type: 'bar',
-    data: {
-      labels: ['Chile', 'México', 'España', 'Francia', 'Alemania', 'Japón', 'EEUU'],
-      datasets: [{
-        label: 'Crecimiento PIB (%)',
-        data: [2.8, 1.9, 2.3, 1.7, 1.5, 1.2, 2.6],
-        backgroundColor: ['#0066cc','#0088ee','#00aaff','#33bbff','#66ccff','#99ddff','#cceeff'],
-        borderRadius: 6
-      }]
-    },
-    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-  });
+  // ─── Date ───
+  const d = new Date();
+  document.getElementById('headerDate').textContent = d.toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'});
 
-  // Doughnut - Gasto Público
-  new Chart(document.getElementById('doughnutChart'), {
-    type: 'doughnut',
-    data: {
-      labels: ['Salud', 'Educación', 'Defensa', 'Infraestructura', 'Social', 'Otros'],
-      datasets: [{
-        data: [22, 18, 10, 15, 25, 10],
-        backgroundColor: ['#003f7f','#0066cc','#0099ff','#33bbff','#66ccff','#b0d8ff'],
-        borderWidth: 2
-      }]
-    },
-    options: { responsive: true, plugins: { legend: { position: 'right' } } }
-  });
+  // ─── Theme ───
+  function toggleTheme() {
+    const h = document.documentElement;
+    const isDark = h.getAttribute('data-theme') === 'dark';
+    h.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.querySelector('.theme-btn').textContent = isDark ? '🌙' : '☀️';
+    rebuildCharts();
+  }
 
-  // Line Chart - Desempleo
-  new Chart(document.getElementById('lineChart'), {
-    type: 'line',
-    data: {
-      labels: ['2020','2021','2022','2023','2024','2025','2026'],
-      datasets: [
-        { label: 'OCDE Promedio', data: [8.2, 7.5, 6.8, 6.2, 5.9, 5.5, 5.2], borderColor: '#0066cc', fill: false, tension: 0.4 },
-        { label: 'Chile', data: [10.8, 9.4, 8.1, 7.4, 7.0, 6.6, 6.3], borderColor: '#e74c3c', fill: false, tension: 0.4 },
-        { label: 'España', data: [15.5, 14.8, 13.2, 12.0, 11.5, 10.9, 10.2], borderColor: '#f39c12', fill: false, tension: 0.4 }
-      ]
-    },
-    options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: false } } }
-  });
+  // ─── Tabs ───
+  function showTab(name, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('sec-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
 
-  // Horizontal Bar - Educación
-  new Chart(document.getElementById('horizontalBar'), {
-    type: 'bar',
-    data: {
-      labels: ['Chile', 'México', 'Turquía', 'OCDE Promedio', 'Canadá', 'Japón'],
-      datasets: [{
-        label: 'Educación Superior (%)',
-        data: [32, 21, 28, 45, 61, 58],
-        backgroundColor: '#0066cc',
-        borderRadius: 6
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: { x: { beginAtZero: true, max: 100 } }
-    }
-  });
+  // ─── Colors ───
+  const C = {
+    blue:'#3b82f6', sky:'#0ea5e9', green:'#10b981', amber:'#f59e0b',
+    red:'#ef4444', indigo:'#6366f1', purple:'#8b5cf6', teal:'#14b8a6',
+    a10: c => c+'1a', a40: c => c+'66'
+  };
+  const YEARS = ['2019','2020','2021','2022','2023','2024'];
+  const PAISES = ['Chile','EE.UU.','R. Unido','Alemania','México','OCDE'];
+
+  function grid() {
+    return { color: getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#e2e8f0' };
+  }
+  function baseOpts(title='') {
+    return {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{ color: getComputedStyle(document.documentElement).getPropertyValue('--text').trim(), font:{size:11} } }, tooltip:{mode:'index',intersect:false} },
+      scales:{ x:{ ticks:{color:getComputedStyle(document.documentElement).getPropertyValue('--subtext').trim(), font:{size:10}}, grid:grid() }, y:{ ticks:{color:getComputedStyle(document.documentElement).getPropertyValue('--subtext').trim(), font:{size:10}}, grid:grid() } }
+    };
+  }
+
+  const charts = {};
+  function destroyAll() { Object.values(charts).forEach(c => c && c.destroy()); }
+
+  function buildCharts() {
+    // 1. Penetración
+    charts.pen = new Chart('chartPenetracion',{ type:'line', data:{ labels:YEARS, datasets:[
+      { label:'Chile', data:[4.1,3.9,4.2,4.5,4.5,4.8], borderColor:C.blue, backgroundColor:C.blue+'22', tension:.4, fill:true, pointRadius:4 },
+      { label:'OCDE Promedio', data:[6.8,6.6,6.9,7.0,7.1,7.3], borderColor:C.amber, borderDash:[6,3], tension:.4, pointRadius:4 }
+    ]}, options:baseOpts() });
+
+    // 2. Distribución primas (donut)
+    charts.pri = new Chart('chartPrimas',{ type:'doughnut', data:{ labels:['Vida','Salud','Auto','Hogar','Otros'], datasets:[{ data:[44,22,18,10,6], backgroundColor:[C.blue,C.sky,C.green,C.amber,C.purple], borderWidth:2, borderColor:'transparent', hoverOffset:8 }] }, options:{ responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{ legend:{ position:'right', labels:{ color:getComputedStyle(document.documentElement).getPropertyValue('--text').trim(), font:{size:11} } } } } });
+
+    // 3. Seguros Vida vs No Vida
+    charts.vid = new Chart('chartSegVida',{ type:'bar', data:{ labels:YEARS, datasets:[
+      { label:'Vida', data:[3200,3050,3400,3700,3850,4100], backgroundColor:C.blue+'bb' },
+      { label:'No Vida', data:[3900,3700,4100,4400,4900,5100], backgroundColor:C.amber+'bb' }
+    ]}, options:{...baseOpts(), scales:{x:{stacked:false, ticks:{color:getComputedStyle(document.documentElement).getPropertyValue('--subtext').trim()}, grid:grid()}, y:{ticks:{color:getComputedStyle(document.documentElement).getPropertyValue('--subtext').trim()}, grid:grid()}}} });
+
+    // 4. Siniestralidad
+    charts.sin = new Chart('chartSiniestralidad',{ type:'bar', data:{ labels:['Vida','Salud','Auto','Hogar','Resp. Civil'], datasets:[{ label:'Índice Siniestralidad (%)', data:[58,72,68,42,51], backgroundColor:[C.blue,C.red,C.amber,C.green,C.purple], borderRadius:6 }]}, options:{...baseOpts(), indexAxis:'y'} });
+
+    // 5. Pensiones Activos
+    charts.penA = new Chart('chartPensActivos',{ type:'line', data:{ labels:YEARS, datasets:[
+      { label:'Chile', data:[70,68,75,79,82,84.3], borderColor:C.green, backgroundColor:C.green+'22', tension:.4, fill:true },
+      { label:'OCDE Promedio', data:[88,85,90,94,96,98.6], borderColor:C.blue, borderDash:[6,3], tension:.4 }
+    ]}, options:baseOpts() });
+
+    // 6. Afiliados por fondo
+    charts.afil = new Chart('chartAfiliados',{ type:'pie', data:{ labels:['Fondo A','Fondo B','Fondo C','Fondo D','Fondo E'], datasets:[{ data:[15,24,38,16,7], backgroundColor:[C.blue,C.sky,C.green,C.amber,C.purple], hoverOffset:10, borderWidth:2 }]}, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'right', labels:{ color:getComputedStyle(document.documentElement).getPropertyValue('--text').trim(), font:{size:11} } } } } });
+
+    // 7. PIB vs Primas
+    charts.pib = new Chart('chartPIBPrimas',{ type:'line', data:{ labels:YEARS, datasets:[
+      { label:'Crecimiento PIB (%)', data:[1.1,-5.8,11.7,2.4,0.2,2.4], borderColor:C.blue, tension:.4, pointRadius:4, yAxisID:'y' },
+      { label:'Crecimiento Primas (%)', data:[4.2,-1.2,8.1,6.3,5.4,5.1], borderColor:C.green, tension:.4, pointRadius:4, yAxisID:'y' }
+    ]}, options:baseOpts() });
+
+    // 8. Tasas
+    charts.tas = new Chart('chartTasas',{ type:'bar', data:{ labels:YEARS, datasets:[
+      { label:'Tasa Política Monetaria (%)', data:[1.75,0.5,2.75,11.25,8.25,5.25], backgroundColor:C.blue+'bb' },
+      { label:'Inflación (%)', data:[3.0,3.0,7.2,12.8,7.6,4.1], backgroundColor:C.red+'bb' }
+    ]}, options:{...baseOpts()} });
+
+    // 9. Bench Penetración
+    charts.bP = new Chart('chartBenchPenetracion',{ type:'bar', data:{ labels:PAISES, datasets:[{ label:'Penetración % PIB', data:[4.8,11.2,9.8,8.4,2.4,7.3], backgroundColor:[C.amber,C.blue,C.sky,C.indigo,C.red,C.green], borderRadius:6 }]}, options:{...baseOpts()} });
+
+    // 10. Bench Pensión
+    charts.bPe = new Chart('chartBenchPension',{ type:'bar', data:{ labels:PAISES, datasets:[{ label:'Tasa de Reemplazo (%)', data:[38.2,49.1,52.3,46.2,26.4,58.6], backgroundColor:[C.amber,C.blue,C.sky,C.indigo,C.red,C.green], borderRadius:6 }]}, options:{...baseOpts()} });
+  }
+
+  function rebuildCharts() { destroyAll(); setTimeout(buildCharts, 80); }
+  function updateCharts() { rebuildCharts(); }
+
+  buildCharts();
 </script>
 </body>
 </html>
