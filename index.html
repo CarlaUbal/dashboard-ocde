@@ -21,9 +21,6 @@
       gap: 20px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
-    header img {
-      height: 50px;
-    }
     header div h1 {
       font-size: 1.8rem;
       font-weight: 700;
@@ -162,7 +159,6 @@
 </footer>
 
 <script>
-  // Bar Chart - PIB
   new Chart(document.getElementById('barChart'), {
     type: 'bar',
     data: {
@@ -177,7 +173,6 @@
     options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
   });
 
-  // Doughnut - Gasto Público
   new Chart(document.getElementById('doughnutChart'), {
     type: 'doughnut',
     data: {
@@ -191,7 +186,6 @@
     options: { responsive: true, plugins: { legend: { position: 'right' } } }
   });
 
-  // Line Chart - Desempleo
   new Chart(document.getElementById('lineChart'), {
     type: 'line',
     data: {
@@ -205,7 +199,6 @@
     options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: false } } }
   });
 
-  // Horizontal Bar - Educación
   new Chart(document.getElementById('horizontalBar'), {
     type: 'bar',
     data: {
